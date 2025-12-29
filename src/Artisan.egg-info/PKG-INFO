@@ -1,0 +1,166 @@
+Metadata-Version: 2.4
+Name: Artisan
+Version: 0.0.0
+Summary: Artisan is a software that helps coffee roasters record, analyze, and control roast profiles.
+Author: Rafael Cobo, Marko Luther, Dave Baxter
+Maintainer: Marko Luther, Dave Baxter
+Project-URL: Homepage, https://artisan-scope.org/
+Project-URL: Documentation, https://artisan-scope.org/docs/quick-start-guide/
+Project-URL: Repository, https://github.com/artisan-roaster-scope/artisan
+Project-URL: Issue Tracker, https://github.com/artisan-roaster-scope/artisan/issues
+Project-URL: Changelog, https://github.com/artisan-roaster-scope/artisan/blob/master/wiki/ReleaseHistory.md
+Keywords: roasting,roast logging,speciality coffee
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Operating System :: Windows
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Topic :: Other/Nonlisted Topic
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: aiohttp==3.13.2
+Requires-Dist: aiohttp-jinja2==1.6
+Requires-Dist: appnope==0.1.4; sys_platform == "darwin"
+Requires-Dist: arabic-reshaper==3.0.0
+Requires-Dist: babel==2.17.0
+Requires-Dist: bleak==2.0.0
+Requires-Dist: build==1.3.0; sys_platform == "win32"
+Requires-Dist: colorspacious==1.1.2
+Requires-Dist: distro==1.9.0; sys_platform == "linux"
+Requires-Dist: jinja2==3.1.6
+Requires-Dist: keyring==25.7.0
+Requires-Dist: lxml==6.0.2
+Requires-Dist: matplotlib==3.10.8
+Requires-Dist: numpy==2.4.0
+Requires-Dist: openpyxl==3.1.5
+Requires-Dist: persist-queue==1.1.0
+Requires-Dist: phidget22==1.23.20251006
+Requires-Dist: pillow==12.0.0
+Requires-Dist: portalocker==3.2.0
+Requires-Dist: prettytable==3.17.0
+Requires-Dist: protobuf==6.33.2
+Requires-Dist: psutil==7.1.3
+Requires-Dist: pydantic==2.12.5
+Requires-Dist: pyinstaller==6.17.0; sys_platform == "darwin" or sys_platform == "linux"
+Requires-Dist: pyinstaller-versionfile==3.0.1; sys_platform == "win32"
+Requires-Dist: pymodbus==3.11.4
+Requires-Dist: pyobjc-core==12.1; sys_platform == "darwin"
+Requires-Dist: pyobjc-framework-cocoa==12.1; sys_platform == "darwin"
+Requires-Dist: pyobjc-framework-corebluetooth==12.1; sys_platform == "darwin"
+Requires-Dist: pyobjc-framework-libdispatch==12.1; sys_platform == "darwin"
+Requires-Dist: pyqt6==6.10.1
+Requires-Dist: pyqt6-webengine==6.10.0
+Requires-Dist: pyserial==3.5
+Requires-Dist: python-bidi==0.6.7
+Requires-Dist: python-snap7==2.0.2
+Requires-Dist: python-statemachine==2.5.0
+Requires-Dist: pyusb==1.3.1
+Requires-Dist: pywin32==311; sys_platform == "win32"
+Requires-Dist: pyyaml==6.0.3
+Requires-Dist: qrcode==8.2
+Requires-Dist: qt6-tools==6.5.0.1.3
+Requires-Dist: requests==2.32.5
+Requires-Dist: requests-file==3.0.1
+Requires-Dist: scipy==1.16.3
+Requires-Dist: secretstorage==3.5.0; sys_platform == "linux"
+Requires-Dist: setuptools==70.3.0
+Requires-Dist: tzdata==2025.3; sys_platform == "win32"
+Requires-Dist: unidecode==1.4.0
+Requires-Dist: websockets==15.0.1
+Requires-Dist: wheel==0.45.1
+Requires-Dist: wquantiles==0.6
+Requires-Dist: xlrd==2.0.2
+Requires-Dist: yoctopuce==2.1.6320
+Dynamic: license-file
+
+#### Artisan helps coffee roasters record, analyze, and control roast profiles. With the help of a thermocouple data logger, or a proportional–integral–derivative controller (PID controller), this software offers roasting metrics to help make decisions that influence the final coffee flavor.
+
+Artisan is free for personal and commercial use, but asks for a [donation](https://www.paypal.me/MarkoLuther).
+
+## HOME
+
+<https://artisan-scope.org>
+
+The home of its development is on GitHub were all source and binary files are available as well as an issue tracker.
+
+<https://github.com/artisan-roaster-scope/artisan>
+
+## DISCUSSION FORUM
+
+<https://github.com/artisan-roaster-scope/artisan/discussions>
+
+## ARTISAN BLOG
+
+https://artisan-roasterscope.blogspot.de
+
+## FEATURES
+
+Runs on 64bit Windows 10, macOS (legacy builds support Windows 8 x64 and macOS 10.13 High Sierra), Redhat/Debian Linux (incl. 64bit Raspberry Pi Bookworm) and supports a large number of devices and roasting machines. See <https://artisan-scope.org/devices/index> for supported devices and <https://artisan-scope.org/machines/index> for supported machines.
+
+**Artisan offers**
+- Unlimited number of curves.
+- Rate-of-rise (RoR), area-under-the-curve (AUC), development-time-ratio (DTR) calculations.
+- Projection lines and head-up-display (HUD).
+- Roast profile evaluation and statistics.
+- Roast-, production- and ranking reports.
+- Automated reproduction of roasts via alarm programs, replay of events or PID control.
+- Batch counter.
+- Profile designer, cupping editor, spider- and wheel graph.
+- Roast Analyzer, Comparator, Simulator and Transformator tools
+- User defined buttons and sliders with programmable actions.
+- Many import and export formats.
+
+## INSTALLATION
+
+See <https://github.com/artisan-roaster-scope/artisan/blob/master/wiki/Installation.md>
+
+## LICENCE
+
+Artisan is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Artisan is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+Copies of the GNU General Public License has been included with this
+distribution in the file `LICENSE.txt`. An online version is available at
+<http://www.gnu.org/licenses/>.
+
+## LIBRARIES
+
+Artisan uses the following libraries in unmodified forms:
+- Python released under the PSF licence http://www.python.org/psf/
+  http://www.python.org/
+- QT under the Qt GNU Lesser General Public License version 2.1 (LGPL)
+  http://qt-project.org/products/licensing
+- Numpy and Scipy, Copyright (c) 2005-2023, NumPy Developers; All Rights Reserved
+  http://www.scipy.org/
+- PyQt under the Qt GNU GPL v. 3.0 licence; Copyright (c) 2010-2023 Riverbank Computing Limited
+  http://www.riverbankcomputing.co.uk/software/pyqt/
+- matplotlib, Copyright (c) 2002-2015 John D. Hunter; All Rights Reserved. Distributed under a licence based on PSF.
+  http://matplotlib.sourceforge.net
+- py2app under the PSF open source licence; Copyright (c) 2004-2006 Bob Ippolito <bob at redivi.com>
+  Copyright (c) 2010-2023 Ronald Oussoren <ronaldoussoren at mac.com>.
+  http://packages.python.org/py2app/
+- pyinstaller under the GPL license
+  http://www.pyinstaller.org
+- pymodbus under the BSD License by Galen Collins
+  https://github.com/bashwork/pymodbus
+- python-snap7 under MIT license
+  https://github.com/gijzelaerr/python-snap7
+- arabic_reshaper.py under GPL by Abd Allah Diab (Mpcabd)
+
+
+## VERSION HISTORY
+
+See <https://github.com/artisan-roaster-scope/artisan>

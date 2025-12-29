@@ -11,10 +11,6 @@ venv/
 env/
 .env/
 
-# uv
-.uv/
-uv.lock
-
 # Python development
 __pycache__/
 *.py[cod]
