@@ -450,11 +450,11 @@ class AillioDummy:
         at high heater settings, ~6+ minutes to reach 260°C at maximum.
         """
         # Base heat transfer coefficient tuned for realistic timescale
-        # Reduced to prevent too-fast heating (was reaching 260°C in 4 min at level 9)
-        base_coeff = 0.0004
+        # Adjusted to prevent stalling at 130°C while keeping total time around 6-7 min
+        base_coeff = 0.0006
         
         # Fan contribution to heat transfer
-        fan_contribution = fan_speed * 0.00015
+        fan_contribution = fan_speed * 0.0002
         
         return base_coeff + fan_contribution
 
@@ -469,7 +469,7 @@ class AillioDummy:
         # Slows heating significantly when moisture is escaping
         if 100 < temp < 150 and self.moisture_content > 3:
             evaporation_intensity = (temp - 100) / 50  # Ramps up with temp
-            reaction -= 0.8 * evaporation_intensity * (self.moisture_content / 12)
+            reaction -= 0.3 * evaporation_intensity * (self.moisture_content / 12)
         
         # First crack (endothermic, 190-205°C)
         # Beans expand and absorb heat
