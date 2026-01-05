@@ -4470,7 +4470,13 @@ class DeviceAssignmentDlg(ArtisanResizeablDialog):
                 ##########################
                 ####  DEVICE 195 is +Yocto Meteo Pressure
                 ##########################
-
+                ##########################
+                ##########################
+                ####  DEVICE 196 is Aillio Bullet Dummy
+                ##########################
+                elif meter == 'Aillio Bullet Dummy':
+                    self.aw.qmc.device = 196
+                    message = QApplication.translate('Message','Device set to {0}').format(meter)
 
                 # ADD DEVICE:
 

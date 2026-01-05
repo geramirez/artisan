@@ -990,7 +990,8 @@ class tgraphcanvas(QObject):
                        '+Phidget HUM1000 Hum/Temp',  #192
                        '+Phidget PRE1000',           #193
                        '+Yocto Meteo Hum/Temp',      #194
-                       '+Yocto Meteo Pressure'       #195
+                       '+Yocto Meteo Pressure',       #195
+                       'Aillio Bullet Dummy',          #196
                        ]
 
         # ADD DEVICE:
@@ -1064,7 +1065,8 @@ class tgraphcanvas(QObject):
             175, # Thermoworks BlueDOT
             176, # Aillio Bullet R2
             194, # +Yocto Meteo Hum/Temp
-            195  # +Yocto Meteo Pressure
+            195,  # +Yocto Meteo Pressure
+            196, # Aillio Bullet Dummy
         ]
 
         # ADD DEVICE:
@@ -1154,7 +1156,8 @@ class tgraphcanvas(QObject):
             192, # +Phidget HUM1000 Hum/Temp
             193, # +Phidget PRE1000
             194, # +Yocto Meteo Hum/Temp
-            195  # +Yocto Meteo Pressure
+            195, # +Yocto Meteo Pressure
+            196, # Aillio Bullet Dummy
         ]
 
         # ADD DEVICE:

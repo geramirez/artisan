@@ -48,6 +48,7 @@ if TYPE_CHECKING:
     from yoctopuce.yocto_api import YMeasure # pylint: disable=unused-import
     from artisanlib.aillio_r1 import AillioR1 # pylint: disable=unused-import
     from artisanlib.aillio_r2 import AillioR2 # pylint: disable=unused-import
+    from artisanlib.aillio_dummy import AillioDummy # pylint: disable=unused-import
 
 
 
@@ -364,7 +365,7 @@ class serialport:
         self.ArduinoIsInitialized = 0
         self.ArduinoFILT = [70,70,70,70] # Arduino Filter settings per channel in %
         self.HH806Winitflag = 0
-        self.R1:AillioR1|AillioR2|None = None
+        self.R1:AillioR1|AillioR2|AillioDummy|None = None
         #list of functions calls to read temperature for devices.
         # device 0 (with index 0 below) is Fuji Pid
         # device 1 (with index 1 below) is Omega HH806
@@ -568,7 +569,8 @@ class serialport:
                                    self.Phidget_HUM1000_HumTemp,     #192
                                    self.Phidget_PRE1000,             #193
                                    self.Yocto_Meteo_HumTemp,         #194
-                                   self.Yocto_Meteo_Pressure         #195
+                                   self.Yocto_Meteo_Pressure,        #195
+                                   self.DummyBullet,                 #196
                                    ]
         #string with the name of the program for device #27
         self.externalprogram:str = 'test.py'
@@ -1597,6 +1599,17 @@ class serialport:
                 self.aw.qmc.adderror(error)
         tx = self.aw.qmc.timeclock.elapsedMilli()
         # DT is being used as IBTS.
+        return tx, self.aw.qmc.R1_BT, self.aw.qmc.R1_DT
+
+    def DummyBullet(self) -> tuple[float,float,float]:
+        if self.R1 == None:
+            from artisanlib.aillio_dummy import AillioDummy
+            self.R1 = AillioDummy()
+        tx = self.aw.qmc.timeclock.elapsedMilli()
+        self.R1.tick()
+        self.aw.qmc.R1_BT = self.R1.get_bt()
+        self.aw.qmc.R1_DT = self.R1.get_dt()
+        _log.info("tick bean temp:%s, prob temp:%s, rewards: %s, ror: %s", self.aw.qmc.R1_BT, self.aw.qmc.R1_DT, self.R1.rewards, self.R1.ibts_bean_temp_rate)
         return tx, self.aw.qmc.R1_BT, self.aw.qmc.R1_DT
 
     def R1_DRUM_BTROR(self) -> tuple[float,float,float]:

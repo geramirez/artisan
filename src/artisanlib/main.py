@@ -8832,6 +8832,7 @@ class ApplicationWindow(QMainWindow): # pyrefly:ignore[invalid-inheritance] # py
                         _log.exception(e)
 
                 lastbuttonpressed = self.lastbuttonpressed # we remember that here as it might be reset to -1 by some button commands to avoid changing its state
+                _log.info("tests", self.ser.R1)
                 if action == 1: # Serial Command
                     cmd_str_bin = b''
                     #example a2b_uu("Hello") sends Hello in binary format instead of ASCII
