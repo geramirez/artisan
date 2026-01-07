@@ -7,8 +7,8 @@ from typing import List
 
 import numpy as np
 
-from RL_training.DQN.dqn_agent import DQNAgent
-from RL_training.environment import create_roaster
+from .DQN.dqn_agent import DQNAgent
+from .environment import create_roaster
 
 
 def train(
@@ -22,8 +22,14 @@ def train(
     """
     Train the DQN agent on the coffee roaster simulator.
 
+    The agent learns to control BOTH heater and fan simultaneously to
+    achieve optimal roast profiles. The action space is a 3×3 grid:
+    - 3 heater options: decrease, keep, increase
+    - 3 fan options: decrease, keep, increase
+    - Total: 9 action combinations
+
     Args:
-        num_episodes: Number of training episodes
+        num_episodes: Number of training episodes (full roasts)
         max_steps: Maximum steps per episode (~20 min at 1s timestep)
         render_interval: Episodes between progress prints
         save_interval: Episodes between model saves
@@ -31,14 +37,16 @@ def train(
         verbose: Whether to show roaster debug output
 
     Returns:
-        List of total rewards per episode
+        List of total rewards per episode (for plotting learning curves)
     """
     # Suppress roaster debug output during training
     logging.getLogger('RL_training.aillio_dummy').setLevel(logging.WARNING)
 
+    # Initialize agent with 5D state (temp, ror, heater, fan, time)
+    # and 9 actions (3 heater × 3 fan combinations)
     agent = DQNAgent(
-        state_size=4,
-        action_size=3,
+        state_size=5,
+        action_size=9,
         hidden_size=128,
         learning_rate=1e-3,
         gamma=0.99,
@@ -64,11 +72,12 @@ def train(
         steps = 0
 
         for step in range(max_steps):
-            # Select and perform action
+            # Select action (0-8) and convert to (heater_change, fan_change)
             action_idx = agent.select_action(state)
-            action_value = agent.get_action_value(action_idx)
+            heater_change, fan_change = agent.get_action_value(action_idx)
 
-            next_state_list, reward, done = roaster.tick(action_value)
+            # Apply both actions to roaster
+            next_state_list, reward, done = roaster.tick(heater_change, fan_change)
             next_state = np.array(next_state_list, dtype=np.float32)
 
             # Store transition and train

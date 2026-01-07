@@ -247,7 +247,7 @@ class serialport:
         'YOCTOlibImported','YOCTOsensor','YOCTOchan1','YOCTOchan2','YOCTOtempIRavg','YOCTOvalues','YOCTOlastvalues','YOCTOsemaphores',\
         'YOCTOthread','YOCTOvoltageOutputs','YOCTOcurrentOutputs','YOCTOrelays','YOCTOservos','YOCTOpwmOutputs','HH506RAid','MS6514PrevTemp1','MS6514PrevTemp2','DT301PrevTemp','EXTECH755PrevTemp',\
         'controlETpid','readBTpid','useModbusPort','showFujiLCDs','arduinoETChannel','arduinoBTChannel','arduinoATChannel',\
-        'ArduinoIsInitialized','ArduinoFILT','HH806Winitflag','R1','devicefunctionlist','externalprogram',\
+        'ArduinoIsInitialized','ArduinoFILT','HH806Winitflag','R1','dqn_agent','devicefunctionlist','externalprogram',\
         'externaloutprogram','externaloutprogramFlag','PhidgetHUMtemp','PhidgetHUMhum','PhidgetPREpre','TMP1000temp', 'colorTrackSerial', 'colorTrackBT', 'CM_ET_readings_count', 'CM_BT_readings_count', 'CM_ET_sum_of_squared_differences', 'CM_BT_sum_of_squared_differences' ]
 
     def __init__(self, aw:'ApplicationWindow') -> None:
@@ -1615,34 +1615,44 @@ class serialport:
         tx = self.aw.qmc.timeclock.elapsedMilli()
         
         # Get current state and select action using DQN agent
+        # Agent returns (heater_change, fan_change) tuple from 9 possible actions
         if self.dqn_agent is not None:
             import numpy as np
             state = np.array(self.R1.get_state_vector(), dtype=np.float32)
             action_idx = self.dqn_agent.select_action(state)
-            action_value = self.dqn_agent.get_action_value(action_idx)
-            _log.debug('DQN action: idx=%s, value=%s', action_idx, action_value)
+            heater_change, fan_change = self.dqn_agent.get_action_value(action_idx)
+            _log.debug('DQN action: idx=%s, heater=%+d, fan=%+d', action_idx, heater_change, fan_change)
         else:
-            action_value = 0  # No action if agent not loaded
+            heater_change, fan_change = 0, 0  # No action if agent not loaded
         
-        # Apply action and advance simulation
-        self.R1.tick(action_value)
+        # Apply both heater and fan actions, advance simulation
+        self.R1.tick(heater_change, fan_change)
         
         self.aw.qmc.R1_BT = self.R1.get_bt()
         self.aw.qmc.R1_DT = self.R1.get_dt()
-        _log.info('DummyBullet tick: BT=%.1f, DT=%.1f, rewards=%.2f, ror=%.2f, heater=%d',
+        _log.info('DummyBullet tick: BT=%.1f, DT=%.1f, rewards=%.2f, ror=%.2f, heater=%d, fan=%d',
                   self.aw.qmc.R1_BT, self.aw.qmc.R1_DT, self.R1.rewards,
-                  self.R1.ibts_bean_temp_rate, self.R1.get_heater())
+                  self.R1.ibts_bean_temp_rate, self.R1.get_heater(), self.R1.get_fan())
         return tx, self.aw.qmc.R1_BT, self.aw.qmc.R1_DT
     
     def _init_dqn_agent(self) -> None:
-        """Initialize the DQN agent and load trained weights."""
+        """Initialize the DQN agent and load trained weights.
+        
+        The agent controls both heater and fan with a 5D state vector:
+            [bean_temp, ror, heater_level, fan_level, time]
+        
+        And 9 possible actions (3 heater × 3 fan combinations):
+            0: heater -1, fan -1    3: heater 0, fan -1    6: heater +1, fan -1
+            1: heater -1, fan  0    4: heater 0, fan  0    7: heater +1, fan  0
+            2: heater -1, fan +1    5: heater 0, fan +1    8: heater +1, fan +1
+        """
         try:
             from pathlib import Path
             from RL_training.DQN.dqn_agent import DQNAgent
             
             self.dqn_agent = DQNAgent(
-                state_size=4,
-                action_size=3,
+                state_size=5,   # bean_temp, ror, heater, fan, time
+                action_size=9,  # 3 heater × 3 fan combinations
                 hidden_size=128,
                 epsilon_start=0.0,  # No exploration during inference
                 epsilon_end=0.0

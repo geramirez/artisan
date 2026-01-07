@@ -118,6 +118,7 @@ class AillioDummy:
             "bean_temp": 0.0,
             "ror": 0.0,
             "heater_level": 0.0,
+            "fan_level": 0.0,
             "time": 0.,
         }
 
@@ -190,8 +191,8 @@ class AillioDummy:
         self.minutes: int = 0
         self.button_crack_mark: int = 0
         self.seconds: int = 0
-        self.heater: int = 0    # PSet - start at high for realistic roast timing
-        self.fan: int = 0        # FSet - start at medium-high for good heat transfer
+        self.heater: int = 7    # PSet - start at medium for realistic roast timing
+        self.fan: int = 3        # FSet - start at medium for good heat transfer
         self.ha_set: int = 0     # HASet
         self.drum: int = 7       # DSet - start at medium-high
         self.r_count: int = 0
@@ -333,14 +334,16 @@ class AillioDummy:
             self.state["bean_temp"],
             self.state["ror"],
             self.state["heater_level"],
+            self.state["fan_level"],
             self.state["time"],
         ]
 
-    def tick(self, action: int = 0) -> tuple[list[float], float, bool]:
+    def tick(self, heater_change: int = 0, fan_change: int = 0) -> tuple[list[float], float, bool]:
         """Simulate one time step (1 second) of roasting with improved physics."""
         dt = 1.0  # Time step in seconds
         # Apply action to heater (heater range is 0-14)
-        self.set_heater(np.clip(self.get_heater() + action , 0, 14))
+        self.set_heater(np.clip(self.get_heater() + heater_change , 0, 14))
+        self.set_fan(np.clip(self.get_fan() + fan_change, 0, 9))
         
         # Store previous values
         previous_ror = self.ibts_bean_temp_rate
@@ -391,6 +394,7 @@ class AillioDummy:
             "bean_temp": self.ibts_bean_temp,
             "ror": self.ibts_bean_temp_rate,
             "heater_level": self.get_heater(),
+            "fan_level": self.get_fan(),
             "time": self.roast_time,
         }
 
@@ -408,12 +412,21 @@ class AillioDummy:
         ror = self.ibts_bean_temp_rate
         ror_change = ror - prev_ror
         temp = self.ibts_bean_temp
+        heater = self.get_heater()
+        fan = self.get_fan()
         
         # Penalize dangerous conditions
         if temp > 240:
             reward -= 20  # Burning territory
         elif temp > 230:
             reward -= 5  # Getting too hot
+        
+        # Reward for maintaining reasonable heater level during active roasting
+        # This encourages the agent to actually use the heater
+        if temp < 180 and heater < 5:
+            reward -= 3  # Penalize low heater when beans are still cool
+        elif temp < 180 and heater >= 7:
+            reward += 2  # Reward appropriate heater use early on
         
         # Stage-specific RoR targets
         if self.roast_phase == 'drying':
