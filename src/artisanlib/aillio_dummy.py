@@ -113,6 +113,13 @@ class AillioDummy:
     def __init__(self, debug:bool = False) -> None:
         # rewards
         self.rewards = 0
+        # state
+        self.state = {
+            "bean_temp": 0.0,
+            "ror": 0.0,
+            "heater_level": 0.0,
+            "time": 0.,
+        }
 
         # Thread safety and cleanup controls
         self._cleanup_lock = threading.Lock()
@@ -321,13 +328,19 @@ class AillioDummy:
             ascii_values = ''.join(chr(b) if 32 <= b <= 126 else '.' for b in chunk)
             print(f"{i:04x}: {hex_values:<48} {ascii_values}")
 
+    def get_state_vector(self):
+        return [
+            self.state["bean_temp"],
+            self.state["ror"],
+            self.state["heater_level"],
+            self.state["time"],
+        ]
 
-    def tick(self, action: int = 0) -> None:
+    def tick(self, action: int = 0) -> tuple[list[float], float, bool]:
         """Simulate one time step (1 second) of roasting with improved physics."""
         dt = 1.0  # Time step in seconds
-        
         # Apply action to heater (heater range is 0-14)
-        self.set_heater(np.clip(self.get_heater() + action, 0, 14))
+        self.set_heater(np.clip(self.get_heater() + action , 0, 14))
         
         # Store previous values
         previous_ror = self.ibts_bean_temp_rate
@@ -371,7 +384,23 @@ class AillioDummy:
         self.update_roast_phase()
         
         # Calculate rewards based on roast profile quality
-        self.rewards += self.calculate_rewards(previous_ror)
+        reward = self.calculate_rewards(previous_ror)
+
+        # Update state dictionary
+        self.state = {
+            "bean_temp": self.ibts_bean_temp,
+            "ror": self.ibts_bean_temp_rate,
+            "heater_level": self.get_heater(),
+            "time": self.roast_time,
+        }
+
+        # Determine done state
+        done = self.ibts_bean_temp >= 260
+        if self.first_crack_occurred and self.roast_time >= (self.development_time_start * 1.2):
+            done = True
+        
+        return self.get_state_vector(), reward, done
+        
 
     def calculate_rewards(self, prev_ror: float) -> float:
         """Calculate stage-aware rewards for RL training."""
@@ -434,7 +463,7 @@ class AillioDummy:
         # Base air temperature from heater power
         # Roasting chamber air is MUCH hotter than beans to drive heat transfer
         # Realistic range: heater 0-14 -> 200-470°C chamber air temp
-        base_temp = 200 + self.heater * 20
+        base_temp = 200 + self.heater * 55
         
         # Fan cooling effect (more fan = more air flow = cooler effective temp)
         # Higher fan speeds remove more heat from the bean environment
@@ -864,7 +893,7 @@ if __name__ == '__main__':
                 f"State: {R2.get_state_string()}, "
                 f"Hot Air: {R2.exitt:.1f}°C, "
                 f"Inlet: {R2.irt:.1f}°C")
-            time.sleep(1)
+            time.sleep(.001)
             R2.tick()
     except KeyboardInterrupt:
         print('\nExiting...')

@@ -77,6 +77,7 @@ dependencies = [
     "scipy==1.16.3",
     "secretstorage==3.5.0 ; sys_platform == 'linux'",
     "setuptools==70.3.0",
+    "torch>=2.9.1",
     "tzdata==2025.3 ; sys_platform == 'win32'",
     "unidecode==1.4.0",
     "websockets==15.0.1",
@@ -388,13 +389,13 @@ include = ["artisanlib/*.py", "plus/*.py", "test/*.py", "test/**/*.py"]
 ## next: flake8-use-pathlib (PTH), flake8-print (T20)
 lint.select = ["E", "F", "UP", "B", "A", "YTT", "COM", "C4", "DTZ", "PIE", "RSE", "RET", "SIM", "ARG", "PLE", "PLR", "PLW", "INT", "RUF013"]
 
+# Never enforce `E501` (line length violations).
+lint.ignore = ["E501", "E741", "E402", "PLR0912", "PLR0913", "PLR0915", "SIM105", "PLR2044", "PLR2004", "PLW0603", "PLR0911", "COM812", "A005"]
+
 output-format = "pylint" # one of: text, json, junit, grouped, github, gitlab, pylint, azure
 
 # Same as Black.
 line-length = 80
-
-# Never enforce `E501` (line length violations).
-lint.ignore = ["E501", "E741", "E402", "PLR0912", "PLR0913", "PLR0915", "SIM105", "PLR2044", "PLR2004", "PLW0603", "PLR0911", "COM812", "A005"]
 
 # Exclude a variety of commonly ignored directories.
 exclude = ["dist", "build", "proto", ".pytype", ".mypy_cache", ".git", ".venv", ".venv_universal", ".venv_arm"]
