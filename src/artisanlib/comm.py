@@ -366,6 +366,7 @@ class serialport:
         self.ArduinoFILT = [70,70,70,70] # Arduino Filter settings per channel in %
         self.HH806Winitflag = 0
         self.R1:AillioR1|AillioR2|AillioDummy|None = None
+        self.dqn_agent = None  # DQN agent for autonomous roaster control
         #list of functions calls to read temperature for devices.
         # device 0 (with index 0 below) is Fuji Pid
         # device 1 (with index 1 below) is Omega HH806
@@ -1602,15 +1603,74 @@ class serialport:
         return tx, self.aw.qmc.R1_BT, self.aw.qmc.R1_DT
 
     def DummyBullet(self) -> tuple[float,float,float]:
-        if self.R1 == None:
+        if self.R1 is None:
             from artisanlib.aillio_dummy import AillioDummy
             self.R1 = AillioDummy()
+            self.R1.AILLIO_DEBUG = False  # Suppress debug output
+        
+        # Initialize DQN agent if not already loaded
+        if not hasattr(self, 'dqn_agent') or self.dqn_agent is None:
+            self._init_dqn_agent()
+        
         tx = self.aw.qmc.timeclock.elapsedMilli()
-        self.R1.tick()
+        
+        # Get current state and select action using DQN agent
+        if self.dqn_agent is not None:
+            import numpy as np
+            state = np.array(self.R1.get_state_vector(), dtype=np.float32)
+            action_idx = self.dqn_agent.select_action(state)
+            action_value = self.dqn_agent.get_action_value(action_idx)
+            _log.debug('DQN action: idx=%s, value=%s', action_idx, action_value)
+        else:
+            action_value = 0  # No action if agent not loaded
+        
+        # Apply action and advance simulation
+        self.R1.tick(action_value)
+        
         self.aw.qmc.R1_BT = self.R1.get_bt()
         self.aw.qmc.R1_DT = self.R1.get_dt()
-        _log.info("tick bean temp:%s, prob temp:%s, rewards: %s, ror: %s", self.aw.qmc.R1_BT, self.aw.qmc.R1_DT, self.R1.rewards, self.R1.ibts_bean_temp_rate)
+        _log.info('DummyBullet tick: BT=%.1f, DT=%.1f, rewards=%.2f, ror=%.2f, heater=%d',
+                  self.aw.qmc.R1_BT, self.aw.qmc.R1_DT, self.R1.rewards,
+                  self.R1.ibts_bean_temp_rate, self.R1.get_heater())
         return tx, self.aw.qmc.R1_BT, self.aw.qmc.R1_DT
+    
+    def _init_dqn_agent(self) -> None:
+        """Initialize the DQN agent and load trained weights."""
+        try:
+            from pathlib import Path
+            from RL_training.training import DQNAgent
+            
+            self.dqn_agent = DQNAgent(
+                state_size=4,
+                action_size=3,
+                hidden_size=128,
+                epsilon_start=0.0,  # No exploration during inference
+                epsilon_end=0.0
+            )
+            
+            # Try to load the best trained model
+            model_paths = [
+                Path(__file__).parent.parent / 'RL_training' / 'dqn_roaster_best.pt',
+                Path(__file__).parent.parent / 'RL_training' / 'dqn_roaster.pt',
+                Path('dqn_roaster_best.pt'),
+                Path('dqn_roaster.pt'),
+            ]
+            
+            model_loaded = False
+            for model_path in model_paths:
+                if model_path.exists():
+                    self.dqn_agent.load(str(model_path))
+                    self.dqn_agent.epsilon = 0.0  # Ensure no exploration
+                    _log.info('DQN agent loaded from %s', model_path)
+                    model_loaded = True
+                    break
+            
+            if not model_loaded:
+                _log.warning('No trained DQN model found, agent will use random policy')
+                
+        except Exception as e:
+            _log.exception('Failed to initialize DQN agent: %s', e)
+            self.dqn_agent = None
 
     def R1_DRUM_BTROR(self) -> tuple[float,float,float]:
         tx = self.aw.qmc.R1_TX
