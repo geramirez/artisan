@@ -48,7 +48,7 @@ if TYPE_CHECKING:
     from yoctopuce.yocto_api import YMeasure # pylint: disable=unused-import
     from artisanlib.aillio_r1 import AillioR1 # pylint: disable=unused-import
     from artisanlib.aillio_r2 import AillioR2 # pylint: disable=unused-import
-    from artisanlib.aillio_dummy import AillioDummy # pylint: disable=unused-import
+    from RL_training.aillio_dummy import AillioDummy # pylint: disable=unused-import
 
 
 
@@ -1604,7 +1604,7 @@ class serialport:
 
     def DummyBullet(self) -> tuple[float,float,float]:
         if self.R1 is None:
-            from artisanlib.aillio_dummy import AillioDummy
+            from RL_training.aillio_dummy import AillioDummy
             self.R1 = AillioDummy()
             self.R1.AILLIO_DEBUG = False  # Suppress debug output
         
@@ -1638,7 +1638,7 @@ class serialport:
         """Initialize the DQN agent and load trained weights."""
         try:
             from pathlib import Path
-            from RL_training.training import DQNAgent
+            from RL_training.DQN.dqn_agent import DQNAgent
             
             self.dqn_agent = DQNAgent(
                 state_size=4,
